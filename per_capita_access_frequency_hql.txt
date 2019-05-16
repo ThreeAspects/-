@@ -1,0 +1,6 @@
+#总访问次数/去重总人数，从访客次数汇总表中查询
+select avg(user_times.count)as user_access_freg
+from
+(select remote_addr.counts from t_display_htip
+union all
+select remote_addr,counts from t_display_access_dcip)user_times;

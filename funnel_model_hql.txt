@@ -1,0 +1,23 @@
+#Funnel model
+select obs.step,obs,numbs,obs.ratio as obs_obs_ratio,rel.ratio as rel_ratio
+from
+(
+select tmp.rnstep as step,tmp,rnnumbs as numbs,tmp.rnnumbs as ratio
+from
+(
+select rn.step as rnstep,rn.numbs as rnnumbs,rr.step as rrstep,rr.numbs as rrnumbs from route_num rn
+inner join
+route_num rr)tmp
+where tmp.rrstep='step1'
+)obs
+left outer join
+(
+select tmp.rrstep as step,tmp.rrnumbs as ratio
+from
+(
+select rn.step as rnsteps,rn.numbs as runnumbs,rr.step as rrstep,rr.numbs as rrnumbs from route_num rn
+inner join
+route_num rr)tmp
+where cast(substr(tmp.rnstep,5,1)as int)=cast(substr(tmp.rrstep,5,1)as int)-1
+)rel
+on obs.step=rel.step

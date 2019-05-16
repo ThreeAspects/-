@@ -1,0 +1,23 @@
+create table dw_ref_host_visit_cnts_h(ref_host string,month string,day string,hour string,ref_host_cnts bigint)
+partitioned by(datestr string);
+
+insert into table dw_ref_host_visit_cnts_h partition(datestr='2019-5-16')
+select ref_host,month,day,hour,count(1) as ref_host_cnts
+from ods_weblog_detail
+group by ref_host,month,day,hour
+having ref_host is not null
+oeder by hour asc,day asc,month asc,ref_host_cnts desc;
+
+
+create table dw_pvs_refhost_topn_h(
+hour string,
+toporder string,
+ref_host string,
+ref_host_cnts string
+)partitioned by(datestr string);
+
+insert into table zs.dw_pvs_refhost_topn_h partition(datestr='2019-5-16')
+select t.hour,t.od,t.ref_host,t.ref_host_cnts from
+(select ref_host,ref_host_cnts,concat(month,day,hour)as hour,
+row_number() over (partition by concat(month,day,hour)order by ref_host_cnts desc)as od
+from zs.dw_ref_host_visit_cnts_h)t where od<=3;
